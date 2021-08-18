@@ -24,8 +24,11 @@ df.set_index('Orthogroup', inplace=True)
 df = df.mask(df>1,1).reset_index()
 df =df.set_index('Orthogroup')
 df.loc[:,'Total'] = df.sum(axis=1)
-df = df[df.Total > 0] #Removing all values less than one
+print(len(df))
+df = df[df.Total > 1] #Removing all rows that have only 1 species
+print(len(df))
 df = df[df.Berghia_stephanieae >0] #Removing all orthogroups that don't contain Berghia. 
+print(len(df))
 
 grp = os.path.join(cwd,"species_grouping.csv")
 grp = pd.read_csv(grp)
@@ -42,8 +45,6 @@ for column in df:
 	col = df[df[column]>0]
 	print(str(column))
 	col.to_csv(str(column)+"_orthogroups.txt", columns=[], header=False)
-
-row = 0
 
 distances = []
 print(len(grp))
@@ -78,27 +79,27 @@ for i in np.arange(len(grp)):
 	else:
 		distances.append(0)
 		
-print(distances)
-print(len(distances))
 grp['Distances']=distances
+grp['Species']=grp['Species'].str.replace(' ','_')
+print(grp)
+print(df)
+row = 0
+distancedf = pd.DataFrame()
+distancedf['Orthologue'] = list(df.index)
+distancedf['FurthestDistance']=0
 for index in df.iterrows():
 	furthest = "1"
+	speciesdf=pd.DataFrame()
 	for column in df:
-		species = str(column)
-		grouping = grp.loc[grp["Header"]==species]
-		if grouping.Grouping =="Animalia":
-			furthest = "Animalia"
-			break
-		elif grouping.Grouping =="Eumetazoa":
-			furthest = "Eumetazoa"
-			break
+		species = 0
+		if df[str(column)].iloc[row]==1:
+			speciesdf=speciesdf.append(grp[grp['Species']==str(column)])
+	distancedf.at[row,'FurthestDistance']=speciesdf['Distances'].max()
+	row = row + 1
 		
-
-	row = row +1
 	
-newdf.to_csv("test.csv")
-	
-	
+print(distancedf)
+distancedf.to_csv()
 		
 	
 
