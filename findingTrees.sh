@@ -26,3 +26,5 @@ while IFS= read -r line || [[ -n $line ]]; do
     cp ${OUTPUT}/Orthogroup_Sequences/${ORTHOGROUP}.fa $line/Orthologues/
     
 done < ../gene_names.txt
+
+python parseOrthofinder.py
